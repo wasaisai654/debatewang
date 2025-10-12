@@ -1,0 +1,1652 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Debate Hub - 全球辩论资源库</title>
+    <!-- 引入Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- 引入Font Awesome -->
+    <link href="https://cdn.jsdelivr.net/npm/font-awesome@4.7.0/css/font-awesome.min.css" rel="stylesheet">
+    <!-- 引入Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.8/dist/chart.umd.min.js"></script>
+    <!-- Google Fonts - Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&amp;display=swap" rel="stylesheet">
+    
+    <!-- Tailwind配置 -->
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        primary: '#165DFF',
+                        secondary: '#36CFC9',
+                        accent: '#722ED1',
+                        dark: '#1D2129',
+                        light: '#F2F3F5'
+                    },
+                    fontFamily: {
+                        inter: ['Inter', 'sans-serif'],
+                    },
+                }
+            }
+        }
+    </script>
+    
+    <!-- 自定义工具类 -->
+    <style type="text/tailwindcss">
+        @layer utilities {
+            .content-auto {
+                content-visibility: auto;
+            }
+            .text-shadow {
+                text-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            }
+            .transition-custom {
+                transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+            }
+        }
+    </style>
+    
+    <style>
+        body {
+            font-family: 'Inter', sans-serif;
+            scroll-behavior: smooth;
+        }
+        
+        /* 动画效果 */
+        .fade-in {
+            animation: fadeIn 0.5s ease-in;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        /* 滚动条美化 */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: #f1f1f1;
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: #c1c1c1;
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: #a1a1a1;
+        }
+        
+        /* 讨论区样式 */
+        .discussion-post:hover {
+            transform: translateY(-2px);
+        }
+        
+        .reply-form {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.3s ease-out;
+        }
+        
+        .reply-form.active {
+            max-height: 300px;
+        }
+    </style>
+</head>
+
+<body class="bg-gray-50 text-dark font-inter">
+    <!-- 导航栏 -->
+    <header id="navbar" class="fixed w-full bg-white/90 backdrop-blur-sm shadow-sm z-50 transition-custom">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <!-- Logo -->
+                <div class="flex items-center">
+                    <a href="#" class="flex items-center space-x-2">
+                        <div class="w-10 h-10 rounded-lg bg-primary flex items-center justify-center">
+                            <i class="fa fa-balance-scale text-white text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold text-primary">Global Debate Hub</span>
+                    </a>
+                </div>
+                
+                <!-- 桌面导航 -->
+                <nav class="hidden md:flex space-x-8">
+                    <a href="#home" class="text-gray-700 hover:text-primary font-medium transition-custom">首页</a>
+                    <a href="#resources" class="text-gray-700 hover:text-primary font-medium transition-custom">资源库</a>
+                    <a href="#debates" class="text-gray-700 hover:text-primary font-medium transition-custom">辩论动态</a>
+                    <a href="#discussion" class="text-primary font-medium transition-custom border-b-2 border-primary pb-1">讨论区</a>
+                    <a href="#upload" class="text-gray-700 hover:text-primary font-medium transition-custom">上传资源</a>
+                    <a href="#community" class="text-gray-700 hover:text-primary font-medium transition-custom">社区</a>
+                </nav>
+                
+                <!-- 用户操作 -->
+                <div class="flex items-center space-x-4">
+                    <div class="hidden md:block relative">
+                        <input type="text" placeholder="搜索资源和讨论..." class="w-64 py-2 pl-10 pr-4 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/50 transition-custom">
+                        <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                    </div>
+                    
+                    <button id="loginBtn" class="hidden sm:block px-4 py-2 text-primary border border-primary rounded-full hover:bg-primary/5 transition-custom">登录</button>
+                    <button id="registerBtn" class="hidden sm:block px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom">注册</button>
+                    
+                    <!-- 移动端菜单按钮 -->
+                    <button id="mobileMenuBtn" class="md:hidden text-gray-700 hover:text-primary transition-custom">
+                        <i class="fa fa-bars text-xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 移动端导航菜单 -->
+        <div id="mobileMenu" class="md:hidden hidden bg-white border-t animate-fadeIn">
+            <div class="container mx-auto px-4 py-3 space-y-3">
+                <a href="#home" class="block py-2 text-gray-700 hover:text-primary font-medium">首页</a>
+                <a href="#resources" class="block py-2 text-gray-700 hover:text-primary font-medium">资源库</a>
+                <a href="#debates" class="block py-2 text-gray-700 hover:text-primary font-medium">辩论动态</a>
+                <a href="#discussion" class="block py-2 text-primary font-medium">讨论区</a>
+                <a href="#upload" class="block py-2 text-gray-700 hover:text-primary font-medium">上传资源</a>
+                <a href="#community" class="block py-2 text-gray-700 hover:text-primary font-medium">社区</a>
+                
+                <div class="relative pt-2">
+                    <input type="text" placeholder="搜索资源和讨论..." class="w-full py-2 pl-10 pr-4 rounded-full bg-gray-100 focus:outline-none focus:ring-2 focus:ring-primary/50">
+                    <i class="fa fa-search absolute left-4 top-1/2 -translate-y-1/2 text-gray-400"></i>
+                </div>
+                
+                <div class="flex space-x-3 pt-2">
+                    <button class="flex-1 px-4 py-2 text-primary border border-primary rounded-full hover:bg-primary/5">登录</button>
+                    <button class="flex-1 px-4 py-2 bg-primary text-white rounded-full hover:bg-primary/90">注册</button>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <main>
+        <!-- 英雄区域 -->
+        <section id="home" class="pt-24 pb-16 md:pt-32 md:pb-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row items-center gap-12">
+                    <div class="lg:w-1/2 fade-in">
+                        <h1 class="text-[clamp(2rem,5vw,3.5rem)] font-bold leading-tight text-dark mb-6">
+                            连接全球辩论爱好者的<br>
+                            <span class="text-primary">知识共享平台</span>
+                        </h1>
+                        <p class="text-lg text-gray-600 mb-8 max-w-xl">
+                            汇聚世界各地的辩论资源、赛事信息和研究资料，助力每一位辩论爱好者成长，促进思想的碰撞与交流。
+                        </p>
+                        <div class="flex flex-wrap gap-4">
+                            <a href="#resources" class="px-8 py-3 bg-primary text-white rounded-full hover:bg-primary/90 shadow-lg shadow-primary/20 transition-custom font-medium">
+                                浏览资源库
+                            </a>
+                            <a href="#discussion" class="px-8 py-3 border border-primary text-primary rounded-full hover:bg-primary/5 transition-custom font-medium">
+                                加入讨论
+                            </a>
+                        </div>
+                        
+                        <div class="mt-12 flex items-center gap-8">
+                            <div class="flex -space-x-3">
+                                <img src="https://picsum.photos/id/1001/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                                <img src="https://picsum.photos/id/1002/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                                <img src="https://picsum.photos/id/1003/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                                <img src="https://picsum.photos/id/1004/100/100" alt="用户头像" class="w-10 h-10 rounded-full border-2 border-white">
+                                <div class="w-10 h-10 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center text-sm font-medium text-gray-600">
+                                    1k+
+                                </div>
+                            </div>
+                            <div>
+                                <div class="flex items-center gap-1 text-yellow-400 mb-1">
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star"></i>
+                                    <i class="fa fa-star-half-o"></i>
+                                    <span class="text-gray-600 ml-1">4.8/5</span>
+                                </div>
+                                <p class="text-sm text-gray-500">来自全球100+国家用户的信赖</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="lg:w-1/2 relative fade-in" style="animation-delay: 0.2s">
+                        <div class="relative z-10 rounded-2xl overflow-hidden shadow-2xl transform hover:scale-[1.02] transition-custom">
+                            <img src="https://picsum.photos/id/1060/800/600" alt="辩论场景" class="w-full h-auto">
+                            <div class="absolute inset-0 bg-gradient-to-t from-black/60 to-transparent"></div>
+                            <div class="absolute bottom-0 left-0 p-6 text-white">
+                                <span class="px-3 py-1 bg-primary/90 rounded-full text-sm font-medium">热门赛事</span>
+                                <h3 class="text-2xl font-bold mt-3">2023年国际大学群英辩论赛</h3>
+                                <p class="text-white/80 mt-1">汇集全球顶尖大学辩论队的思想盛宴</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 装饰元素 -->
+                        <div class="absolute -top-6 -right-6 w-32 h-32 bg-accent/20 rounded-full blur-2xl"></div>
+                        <div class="absolute -bottom-10 -left-10 w-40 h-40 bg-primary/20 rounded-full blur-3xl"></div>
+                    </div>
+                </div>
+                
+                <!-- 统计数据 -->
+                <div class="grid grid-cols-2 md:grid-cols-4 gap-6 mt-20 fade-in" style="animation-delay: 0.4s">
+                    <div class="bg-white p-6 rounded-xl shadow-sm text-center transform hover:-translate-y-1 transition-custom">
+                        <div class="text-4xl font-bold text-primary mb-2">10k+</div>
+                        <div class="text-gray-600">辩论资源</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm text-center transform hover:-translate-y-1 transition-custom">
+                        <div class="text-4xl font-bold text-primary mb-2">5k+</div>
+                        <div class="text-gray-600">注册用户</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm text-center transform hover:-translate-y-1 transition-custom">
+                        <div class="text-4xl font-bold text-primary mb-2">3k+</div>
+                        <div class="text-gray-600">讨论话题</div>
+                    </div>
+                    <div class="bg-white p-6 rounded-xl shadow-sm text-center transform hover:-translate-y-1 transition-custom">
+                        <div class="text-4xl font-bold text-primary mb-2">50+</div>
+                        <div class="text-gray-600">国家地区</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 资源分类 -->
+        <section id="resources" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                    <span class="text-primary font-medium">资源分类</span>
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mt-2 mb-4">探索多样化的辩论资源</h2>
+                    <p class="text-gray-600">我们提供各类辩论相关资料，从基础教程到高级策略，从经典案例到最新赛事分析</p>
+                </div>
+                
+                <!-- 分类标签 -->
+                <div class="flex flex-wrap justify-center gap-3 mb-12 fade-in" style="animation-delay: 0.1s">
+                    <button class="px-5 py-2 bg-primary text-white rounded-full text-sm font-medium">全部资源</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">辩论教程</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">赛事视频</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">辩题分析</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">技巧策略</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">团队管理</button>
+                    <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">评委点评</button>
+                </div>
+                
+                <!-- 资源卡片 -->
+                <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+                    <!-- 资源卡片1 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom group fade-in" style="animation-delay: 0.2s">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/20/600/400" alt="辩论技巧教程" class="w-full h-48 object-cover group-hover:scale-105 transition-custom duration-500">
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-primary/90 text-white text-xs rounded-full">
+                                辩论教程
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <img src="https://picsum.photos/id/1005/100/100" alt="上传者头像" class="w-8 h-8 rounded-full">
+                                <span class="text-sm text-gray-600">张明 · 辩论教练</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-custom">辩论入门：从逻辑到表达</h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                                适合新手的辩论基础教程，涵盖逻辑构建、论点表达、反驳技巧等核心内容。
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span><i class="fa fa-download mr-1"></i> 1.2k</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 3.5k</span>
+                                    <span><i class="fa fa-star text-yellow-400 mr-1"></i> 4.8</span>
+                                </div>
+                                <span class="text-xs text-gray-400">2023-05-18</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 资源卡片2 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom group fade-in" style="animation-delay: 0.3s">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/30/600/400" alt="国际辩论赛视频" class="w-full h-48 object-cover group-hover:scale-105 transition-custom duration-500">
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-accent/90 text-white text-xs rounded-full">
+                                赛事视频
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <img src="https://picsum.photos/id/1006/100/100" alt="上传者头像" class="w-8 h-8 rounded-full">
+                                <span class="text-sm text-gray-600">国际辩论联盟</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-custom">2023世界大学生辩论赛决赛</h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                                完整记录哈佛大学与牛津大学的巅峰对决，辩题：人工智能的发展是否应受到严格限制。
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span><i class="fa fa-download mr-1"></i> 5.8k</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 12.3k</span>
+                                    <span><i class="fa fa-star text-yellow-400 mr-1"></i> 4.9</span>
+                                </div>
+                                <span class="text-xs text-gray-400">2023-07-22</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 资源卡片3 -->
+                    <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom group fade-in" style="animation-delay: 0.4s">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/40/600/400" alt="辩题分析报告" class="w-full h-48 object-cover group-hover:scale-105 transition-custom duration-500">
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-secondary/90 text-white text-xs rounded-full">
+                                辩题分析
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-2 mb-3">
+                                <img src="https://picsum.photos/id/1007/100/100" alt="上传者头像" class="w-8 h-8 rounded-full">
+                                <span class="text-sm text-gray-600">李华 · 辩论研究员</span>
+                            </div>
+                            <h3 class="text-xl font-bold mb-2 group-hover:text-primary transition-custom">气候变化辩题深度解析</h3>
+                            <p class="text-gray-600 text-sm mb-4 line-clamp-2">
+                                全面剖析气候变化相关辩题的正反方论点、数据支持和反驳策略，附带经典案例分析。
+                            </p>
+                            <div class="flex justify-between items-center">
+                                <div class="flex items-center gap-4 text-sm text-gray-500">
+                                    <span><i class="fa fa-download mr-1"></i> 2.4k</span>
+                                    <span><i class="fa fa-eye mr-1"></i> 7.1k</span>
+                                    <span><i class="fa fa-star text-yellow-400 mr-1"></i> 4.7</span>
+                                </div>
+                                <span class="text-xs text-gray-400">2023-09-05</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- 加载更多按钮 -->
+                <div class="text-center mt-12 fade-in" style="animation-delay: 0.8s">
+                    <button class="px-8 py-3 border border-primary text-primary rounded-full hover:bg-primary/5 transition-custom font-medium">
+                        加载更多资源 <i class="fa fa-angle-down ml-1"></i>
+                    </button>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 辩论动态 -->
+        <section id="debates" class="py-16 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col md:flex-row md:items-end justify-between mb-12">
+                    <div class="fade-in">
+                        <span class="text-primary font-medium">最新动态</span>
+                        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mt-2 mb-4">全球辩论赛事与资讯</h2>
+                        <p class="text-gray-600 max-w-xl">及时了解世界各地辩论赛事信息、行业动态和精彩观点</p>
+                    </div>
+                    <div class="mt-6 md:mt-0 fade-in" style="animation-delay: 0.2s">
+                        <a href="#" class="text-primary hover:text-primary/80 font-medium flex items-center">
+                            查看全部动态 <i class="fa fa-arrow-right ml-2"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 主要新闻 -->
+                    <div class="lg:col-span-2 bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom fade-in" style="animation-delay: 0.3s">
+                        <div class="relative">
+                            <img src="https://picsum.photos/id/1015/1200/600" alt="国际辩论赛事" class="w-full h-64 md:h-80 object-cover">
+                            <div class="absolute top-4 left-4 px-3 py-1 bg-primary text-white text-sm rounded-full">
+                                赛事预告
+                            </div>
+                        </div>
+                        <div class="p-6">
+                            <div class="flex items-center gap-4 mb-4">
+                                <span class="text-sm text-gray-500"><i class="fa fa-calendar mr-1"></i> 2023-11-15</span>
+                                <span class="text-sm text-gray-500"><i class="fa fa-map-marker mr-1"></i> 新加坡</span>
+                            </div>
+                            <h3 class="text-2xl font-bold mb-3">2023亚洲大学生辩论锦标赛即将开幕</h3>
+                            <p class="text-gray-600 mb-6">
+                                一年一度的亚洲大学生辩论锦标赛将于11月在新加坡国立大学举行，来自亚洲20多个国家和地区的50多支队伍将参与角逐。本届比赛首次引入AI辅助裁判系统，引发辩论界广泛关注...
+                            </p>
+                            <a href="#" class="inline-flex items-center text-primary font-medium hover:underline">
+                                阅读详情 <i class="fa fa-angle-right ml-1"></i>
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- 新闻列表 -->
+                    <div class="space-y-6 fade-in" style="animation-delay: 0.4s">
+                        <!-- 新闻项1 -->
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom flex">
+                            <img src="https://picsum.photos/id/1016/300/200" alt="辩论新闻" class="w-1/3 object-cover">
+                            <div class="w-2/3 p-4">
+                                <div class="text-xs text-gray-500 mb-2">2023-10-28</div>
+                                <h3 class="font-bold mb-2 line-clamp-2 hover:text-primary transition-custom">世界辩论联合会发布最新辩论规则修订版</h3>
+                                <p class="text-gray-600 text-sm line-clamp-2">新增多项关于科技伦理的辩论规范，适应新时代辩论需求...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 新闻项2 -->
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom flex">
+                            <img src="https://picsum.photos/id/1019/300/200" alt="辩论新闻" class="w-1/3 object-cover">
+                            <div class="w-2/3 p-4">
+                                <div class="text-xs text-gray-500 mb-2">2023-10-22</div>
+                                <h3 class="font-bold mb-2 line-clamp-2 hover:text-primary transition-custom">首届全球线上辩论邀请赛圆满落幕</h3>
+                                <p class="text-gray-600 text-sm line-clamp-2">来自15个国家的辩论队通过线上平台参赛，探讨全球化与本地化...</p>
+                            </div>
+                        </div>
+                        
+                        <!-- 新闻项3 -->
+                        <div class="bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-custom flex">
+                            <img src="https://picsum.photos/id/1025/300/200" alt="辩论新闻" class="w-1/3 object-cover">
+                            <div class="w-2/3 p-4">
+                                <div class="text-xs text-gray-500 mb-2">2023-10-15</div>
+                                <h3 class="font-bold mb-2 line-clamp-2 hover:text-primary transition-custom">青少年辩论教育普及率持续提升</h3>
+                                <p class="text-gray-600 text-sm line-clamp-2">调查显示，全球范围内开设辩论课程的中学数量五年增长37%...</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 用户讨论区 -->
+        <section id="discussion" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                    <span class="text-primary font-medium">思想交流</span>
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mt-2 mb-4">辩论讨论区</h2>
+                    <p class="text-gray-600">在这里，你可以发起辩论相关话题，分享观点，参与讨论，与全球辩论爱好者交流思想</p>
+                </div>
+                
+                <!-- 讨论区操作栏 -->
+                <div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8 fade-in" style="animation-delay: 0.2s">
+                    <div class="flex flex-wrap gap-3">
+                        <button class="px-5 py-2 bg-primary text-white rounded-full text-sm font-medium">全部话题</button>
+                        <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">最新发布</button>
+                        <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">热门讨论</button>
+                        <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">辩题探讨</button>
+                        <button class="px-5 py-2 bg-white text-gray-700 rounded-full text-sm font-medium hover:bg-gray-100 transition-custom">技巧交流</button>
+                    </div>
+                    
+                    <button id="newTopicBtn" class="px-6 py-2 bg-primary text-white rounded-full hover:bg-primary/90 transition-custom font-medium flex items-center">
+                        <i class="fa fa-plus mr-2"></i> 发起新话题
+                    </button>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 讨论话题列表 -->
+                    <div class="lg:col-span-2 space-y-6 fade-in" style="animation-delay: 0.3s">
+                        <!-- 话题1 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 discussion-post transition-custom">
+                            <div class="flex justify-between">
+                                <div class="flex gap-4">
+                                    <img src="https://picsum.photos/id/1027/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold">林思远</h4>
+                                            <span class="px-2 py-0.5 bg-primary/10 text-primary text-xs rounded-full">清华大学辩论队</span>
+                                        </div>
+                                        <p class="text-gray-500 text-sm">发布于 2小时前</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">328 回复</div>
+                                    <div class="text-xs text-gray-500">最后回复: 5分钟前</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h3 class="text-xl font-bold mb-2 hover:text-primary transition-custom cursor-pointer topic-title">人工智能的发展是否应该受到严格限制？</h3>
+                                <p class="text-gray-600 mb-4">
+                                    随着ChatGPT等AI技术的快速发展，关于AI监管的讨论日益激烈。支持者认为严格限制是必要的，以防止潜在风险；反对者则认为过度监管会阻碍创新...
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">人工智能</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">科技伦理</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">热门辩题</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-5 pt-5 border-t border-gray-100">
+                                <button class="view-replies text-primary hover:text-primary/80 font-medium text-sm">
+                                    查看全部回复 <i class="fa fa-angle-down ml-1"></i>
+                                </button>
+                                
+                                <!-- 部分回复预览 -->
+                                <div class="replies-preview mt-4 space-y-4">
+                                    <!-- 回复1 -->
+                                    <div class="flex gap-3">
+                                        <img src="https://picsum.photos/id/1028/100/100" alt="用户头像" class="w-10 h-10 rounded-full">
+                                        <div class="flex-1">
+                                            <div class="flex items-center gap-2">
+                                                <h5 class="font-medium">David Chen</h5>
+                                                <span class="text-xs text-gray-500">1小时前</span>
+                                            </div>
+                                            <p class="text-gray-600 text-sm mt-1">
+                                                我认为应该建立灵活的监管框架，而不是严格限制。可以借鉴"监管沙盒"模式，在可控环境中测试AI应用，平衡创新与风险。
+                                            </p>
+                                            <div class="flex items-center gap-4 mt-2 text-sm">
+                                                <button class="text-gray-500 hover:text-primary transition-custom"><i class="fa fa-thumbs-up mr-1"></i> 42</button>
+                                                <button class="text-gray-500 hover:text-primary transition-custom reply-btn"><i class="fa fa-reply mr-1"></i> 回复</button>
+                                            </div>
+                                            
+                                            <!-- 嵌套回复 -->
+                                            <div class="mt-3 ml-6 pl-3 border-l-2 border-gray-100">
+                                                <div class="flex gap-3">
+                                                    <img src="https://picsum.photos/id/1029/100/100" alt="用户头像" class="w-8 h-8 rounded-full">
+                                                    <div class="flex-1">
+                                                        <div class="flex items-center gap-2">
+                                                            <h5 class="font-medium text-sm">Sarah Johnson</h5>
+                                                            <span class="text-xs text-gray-500">45分钟前</span>
+                                                        </div>
+                                                        <p class="text-gray-600 text-xs mt-1">
+                                                            @David Chen 监管沙盒是个好主意，但如何确保不同国家和地区的监管标准协调一致？这可能是个挑战。
+                                                        </p>
+                                                        <div class="flex items-center gap-4 mt-1 text-xs">
+                                                            <button class="text-gray-500 hover:text-primary transition-custom"><i class="fa fa-thumbs-up mr-1"></i> 18</button>
+                                                            <button class="text-gray-500 hover:text-primary transition-custom reply-btn"><i class="fa fa-reply mr-1"></i> 回复</button>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- 回复表单 -->
+                                <div class="reply-form mt-4">
+                                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" rows="3" placeholder="分享你的观点..."></textarea>
+                                    <div class="flex justify-end mt-3">
+                                        <button class="cancel-reply px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-custom mr-2">取消</button>
+                                        <button class="submit-reply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom">发表回复</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 话题2 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 discussion-post transition-custom">
+                            <div class="flex justify-between">
+                                <div class="flex gap-4">
+                                    <img src="https://picsum.photos/id/1030/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold">王梓涵</h4>
+                                            <span class="px-2 py-0.5 bg-secondary/10 text-secondary text-xs rounded-full">全国中学生辩论冠军</span>
+                                        </div>
+                                        <p class="text-gray-500 text-sm">发布于 昨天</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">186 回复</div>
+                                    <div class="text-xs text-gray-500">最后回复: 3小时前</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h3 class="text-xl font-bold mb-2 hover:text-primary transition-custom cursor-pointer topic-title">辩论技巧更重要还是知识储备更重要？</h3>
+                                <p class="text-gray-600 mb-4">
+                                    这个问题困扰我很久了。有人说"巧妇难为无米之炊"，没有足够的知识储备，再好的技巧也没用；但也有人认为，有技巧才能更好地组织和呈现知识...
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">辩论技巧</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">知识储备</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">辩论基础</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-5 pt-5 border-t border-gray-100">
+                                <button class="view-replies text-primary hover:text-primary/80 font-medium text-sm">
+                                    查看全部回复 <i class="fa fa-angle-down ml-1"></i>
+                                </button>
+                                
+                                <!-- 部分回复预览 -->
+                                <div class="replies-preview mt-4 space-y-4 hidden">
+                                    <!-- 回复内容将在点击查看时显示 -->
+                                </div>
+                                
+                                <!-- 回复表单 -->
+                                <div class="reply-form mt-4">
+                                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" rows="3" placeholder="分享你的观点..."></textarea>
+                                    <div class="flex justify-end mt-3">
+                                        <button class="cancel-reply px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-custom mr-2">取消</button>
+                                        <button class="submit-reply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom">发表回复</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 话题3 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6 discussion-post transition-custom">
+                            <div class="flex justify-between">
+                                <div class="flex gap-4">
+                                    <img src="https://picsum.photos/id/1031/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <div class="flex items-center gap-2">
+                                            <h4 class="font-bold">Stephen Wang</h4>
+                                            <span class="px-2 py-0.5 bg-accent/10 text-accent text-xs rounded-full">辩论爱好者</span>
+                                        </div>
+                                        <p class="text-gray-500 text-sm">发布于 3天前</p>
+                                    </div>
+                                </div>
+                                <div class="text-right">
+                                    <div class="text-sm font-medium">152 回复</div>
+                                    <div class="text-xs text-gray-500">最后回复: 1天前</div>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-4">
+                                <h3 class="text-xl font-bold mb-2 hover:text-primary transition-custom cursor-pointer topic-title">线上辩论是否会取代传统线下辩论？</h3>
+                                <p class="text-gray-600 mb-4">
+                                    疫情后线上辩论逐渐普及，它有哪些优势和不足？未来是否会成为主流辩论形式？线上辩论在技术、互动性和公平性方面还面临哪些挑战？
+                                </p>
+                                <div class="flex flex-wrap gap-2">
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">线上辩论</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">辩论形式</span>
+                                    <span class="px-3 py-1 bg-gray-100 text-gray-700 text-xs rounded-full">未来趋势</span>
+                                </div>
+                            </div>
+                            
+                            <div class="mt-5 pt-5 border-t border-gray-100">
+                                <button class="view-replies text-primary hover:text-primary/80 font-medium text-sm">
+                                    查看全部回复 <i class="fa fa-angle-down ml-1"></i>
+                                </button>
+                                
+                                <!-- 回复表单 -->
+                                <div class="reply-form mt-4">
+                                    <textarea class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" rows="3" placeholder="分享你的观点..."></textarea>
+                                    <div class="flex justify-end mt-3">
+                                        <button class="cancel-reply px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-custom mr-2">取消</button>
+                                        <button class="submit-reply px-4 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom">发表回复</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 分页 -->
+                        <div class="flex justify-center mt-8">
+                            <nav class="flex items-center gap-1">
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-500 hover:border-primary hover:text-primary transition-custom">
+                                    <i class="fa fa-angle-left"></i>
+                                </button>
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg bg-primary text-white">1</button>
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:border-primary hover:text-primary transition-custom">2</button>
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:border-primary hover:text-primary transition-custom">3</button>
+                                <span class="w-10 h-10 flex items-center justify-center">...</span>
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 hover:border-primary hover:text-primary transition-custom">12</button>
+                                <button class="w-10 h-10 flex items-center justify-center rounded-lg border border-gray-300 text-gray-500 hover:border-primary hover:text-primary transition-custom">
+                                    <i class="fa fa-angle-right"></i>
+                                </button>
+                            </nav>
+                        </div>
+                    </div>
+                    
+                    <!-- 讨论区侧边栏 -->
+                    <div class="space-y-6 fade-in" style="animation-delay: 0.4s">
+                        <!-- 发起话题卡片 -->
+                        <div class="bg-gradient-to-br from-primary to-accent rounded-xl p-6 text-white shadow-md">
+                            <h3 class="text-xl font-bold mb-3">有新的想法？</h3>
+                            <p class="text-white/80 text-sm mb-4">
+                                发起一个新的辩论话题，与全球辩论爱好者一起交流探讨，碰撞思想火花。
+                            </p>
+                            <button id="sidebarNewTopicBtn" class="w-full py-3 bg-white text-primary rounded-lg hover:bg-gray-100 transition-custom font-medium">
+                                发起新话题
+                            </button>
+                        </div>
+                        
+                        <!-- 热门话题 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">热门话题</h3>
+                            <div class="space-y-4">
+                                <a href="#" class="block group">
+                                    <h4 class="font-medium group-hover:text-primary transition-custom line-clamp-2">如何在辩论中有效反驳对方观点而不显得攻击性过强？</h4>
+                                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                        <span><i class="fa fa-comment mr-1"></i> 217</span>
+                                        <span><i class="fa fa-eye mr-1"></i> 1.8k</span>
+                                    </div>
+                                </a>
+                                <a href="#" class="block group">
+                                    <h4 class="font-medium group-hover:text-primary transition-custom line-clamp-2">新手辩手最容易犯的10个错误及如何避免</h4>
+                                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                        <span><i class="fa fa-comment mr-1"></i> 189</span>
+                                        <span><i class="fa fa-eye mr-1"></i> 2.1k</span>
+                                    </div>
+                                </a>
+                                <a href="#" class="block group">
+                                    <h4 class="font-medium group-hover:text-primary transition-custom line-clamp-2">辩论中的数据引用：如何确保准确性和说服力</h4>
+                                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                        <span><i class="fa fa-comment mr-1"></i> 156</span>
+                                        <span><i class="fa fa-eye mr-1"></i> 1.5k</span>
+                                    </div>
+                                </a>
+                                <a href="#" class="block group">
+                                    <h4 class="font-medium group-hover:text-primary transition-custom line-clamp-2">政策性辩论与价值性辩论的核心区别与技巧</h4>
+                                    <div class="flex items-center gap-3 mt-1 text-sm text-gray-500">
+                                        <span><i class="fa fa-comment mr-1"></i> 142</span>
+                                        <span><i class="fa fa-eye mr-1"></i> 1.3k</span>
+                                    </div>
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <!-- 活跃讨论者 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">活跃讨论者</h3>
+                            <div class="space-y-4">
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://picsum.photos/id/1035/100/100" alt="用户头像" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="font-medium text-sm">陈思哲</h4>
+                                            <p class="text-gray-500 text-xs">243 条发言</p>
+                                        </div>
+                                    </div>
+                                    <button class="px-3 py-1 border border-primary text-primary rounded-full text-xs hover:bg-primary/5 transition-custom">
+                                        关注
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://picsum.photos/id/1036/100/100" alt="用户头像" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="font-medium text-sm">刘梦琪</h4>
+                                            <p class="text-gray-500 text-xs">187 条发言</p>
+                                        </div>
+                                    </div>
+                                    <button class="px-3 py-1 border border-primary text-primary rounded-full text-xs hover:bg-primary/5 transition-custom">
+                                        关注
+                                    </button>
+                                </div>
+                                <div class="flex items-center justify-between">
+                                    <div class="flex items-center gap-3">
+                                        <img src="https://picsum.photos/id/1037/100/100" alt="用户头像" class="w-10 h-10 rounded-full">
+                                        <div>
+                                            <h4 class="font-medium text-sm">Michael Zhang</h4>
+                                            <p class="text-gray-500 text-xs">156 条发言</p>
+                                        </div>
+                                    </div>
+                                    <button class="px-3 py-1 border border-primary text-primary rounded-full text-xs hover:bg-primary/5 transition-custom">
+                                        关注
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- 讨论规则 -->
+                        <div class="bg-white rounded-xl shadow-sm p-6">
+                            <h3 class="text-lg font-bold mb-4">讨论规则</h3>
+                            <ul class="space-y-2 text-sm text-gray-600">
+                                <li class="flex items-start gap-2">
+                                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                                    <span>尊重不同观点，理性讨论，禁止人身攻击</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                                    <span>围绕辩论相关话题展开讨论，保持内容相关性</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                                    <span>禁止发布广告、垃圾信息和违法内容</span>
+                                </li>
+                                <li class="flex items-start gap-2">
+                                    <i class="fa fa-check-circle text-primary mt-1"></i>
+                                    <span>引用他人观点时请注明来源，尊重知识产权</span>
+                                </li>
+                            </ul>
+                            <a href="#" class="text-primary text-sm hover:underline mt-4 block">查看完整社区规范</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 发起新话题模态框 -->
+        <div id="newTopicModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+            <div class="bg-white rounded-2xl shadow-2xl w-full max-w-2xl mx-4 transform transition-all scale-95 opacity-0" id="newTopicModalContent">
+                <div class="p-6 md:p-8">
+                    <div class="flex justify-between items-center mb-6">
+                        <h3 class="text-xl font-bold">发起新话题</h3>
+                        <button id="closeNewTopicModal" class="text-gray-500 hover:text-gray-700">
+                            <i class="fa fa-times text-xl"></i>
+                        </button>
+                    </div>
+                    
+                    <form id="newTopicForm">
+                        <div class="mb-5">
+                            <label for="topicTitle" class="block text-sm font-medium text-gray-700 mb-1">话题标题 *</label>
+                            <input type="text" id="topicTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="请输入话题标题，清晰表达你想讨论的内容">
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label for="topicCategory" class="block text-sm font-medium text-gray-700 mb-1">话题分类 *</label>
+                            <select id="topicCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom">
+                                <option value="">请选择分类</option>
+                                <option value="topic-discussion">辩题探讨</option>
+                                <option value="skill交流">技巧交流</option>
+                                <option value="event-info">赛事信息</option>
+                                <option value="resource-sharing">资源分享</option>
+                                <option value="experience">经验分享</option>
+                                <option value="other">其他</option>
+                            </select>
+                        </div>
+                        
+                        <div class="mb-5">
+                            <label for="topicContent" class="block text-sm font-medium text-gray-700 mb-1">话题内容 *</label>
+                            <textarea id="topicContent" rows="6" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="请详细描述你想讨论的内容，可以包括你的观点、疑问或相关背景信息等"></textarea>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <label for="topicTags" class="block text-sm font-medium text-gray-700 mb-1">标签（可选）</label>
+                            <input type="text" id="topicTags" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="输入标签，用逗号分隔，最多5个标签，每个标签不超过8个字">
+                            <p class="text-xs text-gray-500 mt-1">例如：人工智能, 辩论技巧, 新手入门</p>
+                        </div>
+                        
+                        <div class="flex justify-end gap-3">
+                            <button type="button" id="cancelTopicBtn" class="px-6 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-custom">取消</button>
+                            <button type="submit" class="px-6 py-2 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom font-medium">发布话题</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        <!-- 上传资源 -->
+        <section id="upload" class="py-16 md:py-24 bg-gray-50">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="flex flex-col lg:flex-row gap-12 items-center">
+                    <div class="lg:w-1/2 fade-in">
+                        <span class="text-primary font-medium">贡献知识</span>
+                        <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mt-2 mb-4">分享你的辩论资源</h2>
+                        <p class="text-gray-600 mb-6">
+                            无论你是辩论新手还是资深辩手，都可以上传有价值的辩论资料，帮助更多辩论爱好者成长。我们支持多种格式的资源上传，包括文档、视频、音频和图片等。
+                        </p>
+                        
+                        <div class="space-y-4 mb-8">
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-file-text-o"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">文档资料</h3>
+                                    <p class="text-gray-600 text-sm">上传辩论稿、分析报告、训练计划等PDF或Word文档</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-video-camera"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">视频资源</h3>
+                                    <p class="text-gray-600 text-sm">分享辩论比赛录像、训练视频、技巧讲解等视频内容</p>
+                                </div>
+                            </div>
+                            
+                            <div class="flex items-start gap-4">
+                                <div class="w-10 h-10 rounded-full bg-primary/10 flex items-center justify-center text-primary flex-shrink-0">
+                                    <i class="fa fa-microphone"></i>
+                                </div>
+                                <div>
+                                    <h3 class="font-bold mb-1">音频内容</h3>
+                                    <p class="text-gray-600 text-sm">上传辩论音频、战术分析、评委点评等音频资料</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="bg-primary/5 p-4 rounded-lg border border-primary/20">
+                            <div class="flex items-start gap-3">
+                                <i class="fa fa-info-circle text-primary mt-1"></i>
+                                <p class="text-sm text-gray-700">
+                                    所有上传的资源将经过审核后发布，确保内容质量和版权合规。优质资源贡献者将获得平台积分奖励，可兑换辩论培训课程和赛事门票。
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 上传表单 -->
+                    <div class="lg:w-1/2 w-full max-w-lg fade-in" style="animation-delay: 0.3s">
+                        <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                            <h3 class="text-xl font-bold mb-6">上传新资源</h3>
+                            
+                            <form id="uploadForm">
+                                <div class="mb-5">
+                                    <label for="resourceTitle" class="block text-sm font-medium text-gray-700 mb-1">资源标题 *</label>
+                                    <input type="text" id="resourceTitle" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="请输入资源标题">
+                                </div>
+                                
+                                <div class="mb-5">
+                                    <label for="resourceCategory" class="block text-sm font-medium text-gray-700 mb-1">资源分类 *</label>
+                                    <select id="resourceCategory" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom">
+                                        <option value="">请选择分类</option>
+                                        <option value="tutorial">辩论教程</option>
+                                        <option value="video">赛事视频</option>
+                                        <option value="analysis">辩题分析</option>
+                                        <option value="strategy">技巧策略</option>
+                                        <option value="team">团队管理</option>
+                                        <option value="judge">评委点评</option>
+                                    </select>
+                                </div>
+                                
+                                <div class="mb-5">
+                                    <label for="resourceDescription" class="block text-sm font-medium text-gray-700 mb-1">资源描述</label>
+                                    <textarea id="resourceDescription" rows="3" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="请简要描述资源内容和特点"></textarea>
+                                </div>
+                                
+                                <div class="mb-5">
+                                    <label class="block text-sm font-medium text-gray-700 mb-1">上传文件 *</label>
+                                    <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-primary transition-custom cursor-pointer bg-gray-50">
+                                        <input type="file" id="resourceFile" class="hidden">
+                                        <label for="resourceFile" class="cursor-pointer">
+                                            <div class="w-12 h-12 bg-primary/10 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                <i class="fa fa-cloud-upload text-primary text-xl"></i>
+                                            </div>
+                                            <p class="text-gray-700 font-medium mb-1">点击或拖拽文件到此处上传</p>
+                                            <p class="text-gray-500 text-xs">支持 PDF, DOC, DOCX, MP4, MP3, JPG, PNG 格式，最大50MB</p>
+                                        </label>
+                                    </div>
+                                </div>
+                                
+                                <div class="mb-6">
+                                    <label class="flex items-center">
+                                        <input type="checkbox" class="w-4 h-4 text-primary focus:ring-primary border-gray-300 rounded">
+                                        <span class="ml-2 text-sm text-gray-600">我确认此资源为本人原创或已获得授权，不侵犯任何第三方权益 *</span>
+                                    </label>
+                                </div>
+                                
+                                <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom font-medium">
+                                    提交上传
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 社区板块 -->
+        <section id="community" class="py-16 md:py-24">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center max-w-3xl mx-auto mb-16 fade-in">
+                    <span class="text-primary font-medium">辩论社区</span>
+                    <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mt-2 mb-4">连接全球辩论爱好者</h2>
+                    <p class="text-gray-600">加入我们的社区，结识志同道合的辩友，参与话题讨论，共同提升辩论水平</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                    <!-- 活跃用户 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 fade-in" style="animation-delay: 0.2s">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold">活跃辩论达人</h3>
+                            <a href="#" class="text-primary text-sm hover:underline">查看全部</a>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <!-- 用户1 -->
+                            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-custom">
+                                <div class="flex items-center gap-3">
+                                    <img src="https://picsum.photos/id/1027/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <h4 class="font-medium">林思远</h4>
+                                        <p class="text-sm text-gray-500">清华大学辩论队队长</p>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1 border border-primary text-primary rounded-full text-sm hover:bg-primary/5 transition-custom">
+                                    关注
+                                </button>
+                            </div>
+                            
+                            <!-- 用户2 -->
+                            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-custom">
+                                <div class="flex items-center gap-3">
+                                    <img src="https://picsum.photos/id/1028/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <h4 class="font-medium">David Chen</h4>
+                                        <p class="text-sm text-gray-500">哈佛大学辩手，国际冠军</p>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1 border border-primary text-primary rounded-full text-sm hover:bg-primary/5 transition-custom">
+                                    关注
+                                </button>
+                            </div>
+                            
+                            <!-- 用户3 -->
+                            <div class="flex items-center justify-between p-3 rounded-lg hover:bg-gray-50 transition-custom">
+                                <div class="flex items-center gap-3">
+                                    <img src="https://picsum.photos/id/1029/100/100" alt="用户头像" class="w-12 h-12 rounded-full">
+                                    <div>
+                                        <h4 class="font-medium">Sarah Johnson</h4>
+                                        <p class="text-sm text-gray-500">辩论教练，裁判</p>
+                                    </div>
+                                </div>
+                                <button class="px-3 py-1 border border-primary text-primary rounded-full text-sm hover:bg-primary/5 transition-custom">
+                                    关注
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 数据统计 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 fade-in" style="animation-delay: 0.3s">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold">平台数据统计</h3>
+                            <span class="text-sm text-gray-500">更新于今日</span>
+                        </div>
+                        
+                        <!-- 图表 -->
+                        <div class="mb-8">
+                            <canvas id="resourceChart" height="200"></canvas>
+                        </div>
+                        
+                        <div class="space-y-4">
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">辩论教程</span>
+                                    <span class="font-medium">3,245</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-primary h-2 rounded-full" style="width: 35%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">赛事视频</span>
+                                    <span class="font-medium">2,871</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-accent h-2 rounded-full" style="width: 30%"></div>
+                                </div>
+                            </div>
+                            
+                            <div>
+                                <div class="flex justify-between text-sm mb-1">
+                                    <span class="text-gray-600">辩题分析</span>
+                                    <span class="font-medium">2,156</span>
+                                </div>
+                                <div class="w-full bg-gray-100 rounded-full h-2">
+                                    <div class="bg-secondary h-2 rounded-full" style="width: 23%"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- 即将到来的赛事 -->
+                    <div class="bg-white rounded-xl shadow-sm p-6 fade-in" style="animation-delay: 0.4s">
+                        <div class="flex justify-between items-center mb-6">
+                            <h3 class="text-lg font-bold">即将到来的辩论赛事</h3>
+                            <a href="#" class="text-primary text-sm hover:underline">更多赛事</a>
+                        </div>
+                        
+                        <div class="space-y-6">
+                            <!-- 赛事1 -->
+                            <div class="border-l-4 border-primary p-4 rounded-r-lg hover:shadow-md transition-custom">
+                                <h4 class="font-bold">2023国际公共政策辩论会</h4>
+                                <p class="text-gray-600 text-sm mt-1">聚焦全球治理与公共政策</p>
+                                <div class="flex items-center text-gray-500 text-sm mt-3">
+                                    <i class="fa fa-calendar w-5 text-primary mr-2"></i>
+                                    <span>2023-11-20 至 2023-11-25</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 赛事2 -->
+                            <div class="border-l-4 border-accent p-4 rounded-r-lg hover:shadow-md transition-custom">
+                                <h4 class="font-bold">全国中学生辩论联赛</h4>
+                                <p class="text-gray-600 text-sm mt-1">主题：全球化与本土化的平衡</p>
+                                <div class="flex items-center text-gray-500 text-sm mt-3">
+                                    <i class="fa fa-calendar w-5 text-accent mr-2"></i>
+                                    <span>2023-12-05 至 2023-12-10</span>
+                                </div>
+                            </div>
+                            
+                            <!-- 赛事3 -->
+                            <div class="border-l-4 border-secondary p-4 rounded-r-lg hover:shadow-md transition-custom">
+                                <h4 class="font-bold">气候变化国际辩论峰会</h4>
+                                <p class="text-gray-600 text-sm mt-1">跨界对话与解决方案探讨</p>
+                                <div class="flex items-center text-gray-500 text-sm mt-3">
+                                    <i class="fa fa-calendar w-5 text-secondary mr-2"></i>
+                                    <span>2024-01-15 至 2024-01-18</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+        
+        <!-- 加入我们 -->
+        <section class="py-16 md:py-24 bg-gradient-to-br from-primary/5 to-secondary/5">
+            <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="bg-gradient-to-r from-primary to-primary/80 rounded-3xl overflow-hidden shadow-xl">
+                    <div class="flex flex-col lg:flex-row items-center">
+                        <div class="lg:w-1/2 p-8 md:p-12 lg:p-16 text-white fade-in">
+                            <h2 class="text-[clamp(1.5rem,3vw,2.5rem)] font-bold mb-4">加入全球辩论爱好者社区</h2>
+                            <p class="mb-8 text-white/80 max-w-lg">
+                                注册成为会员，获取更多辩论资源，参与独家活动，与全球辩友交流互动，提升你的辩论技巧。
+                            </p>
+                            <div class="flex flex-wrap gap-4">
+                                <button id="joinNowBtn" class="px-8 py-3 bg-white text-primary rounded-full hover:bg-gray-100 transition-custom font-medium">
+                                    立即加入
+                                </button>
+                                <button class="px-8 py-3 border border-white text-white rounded-full hover:bg-white/10 transition-custom font-medium">
+                                    了解会员权益
+                                </button>
+                            </div>
+                        </div>
+                        <div class="lg:w-1/2 p-8 md:p-12 lg:p-16 fade-in" style="animation-delay: 0.3s">
+                            <div class="bg-white p-6 md:p-8 rounded-2xl shadow-lg">
+                                <h3 class="text-xl font-bold mb-6">快速注册</h3>
+                                
+                                <form id="registerForm">
+                                    <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-4">
+                                        <div>
+                                            <label for="firstName" class="block text-sm font-medium text-gray-700 mb-1">姓氏</label>
+                                            <input type="text" id="firstName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom">
+                                        </div>
+                                        <div>
+                                            <label for="lastName" class="block text-sm font-medium text-gray-700 mb-1">名字</label>
+                                            <input type="text" id="lastName" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom">
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label for="registerEmail" class="block text-sm font-medium text-gray-700 mb-1">电子邮箱 *</label>
+                                        <input type="email" id="registerEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="your@email.com">
+                                    </div>
+                                    
+                                    <div class="mb-4">
+                                        <label for="registerPassword" class="block text-sm font-medium text-gray-700 mb-1">设置密码 *</label>
+                                        <input type="password" id="registerPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="至少8位字符">
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label for="userType" class="block text-sm font-medium text-gray-700 mb-1">用户类型 *</label>
+                                        <select id="userType" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom">
+                                            <option value="">请选择</option>
+                                            <option value="student">学生辩手</option>
+                                            <option value="coach">辩论教练</option>
+                                            <option value="judge">评委</option>
+                                            <option value="enthusiast">辩论爱好者</option>
+                                            <option value="other">其他</option>
+                                        </select>
+                                    </div>
+                                    
+                                    <div class="mb-6">
+                                        <label class="flex items-start">
+                                            <input type="checkbox" class="w-4 h-4 mt-1 text-primary focus:ring-primary border-gray-300 rounded">
+                                            <span class="ml-2 text-sm text-gray-600">我已阅读并同意<a href="#" class="text-primary hover:underline">服务条款</a>和<a href="#" class="text-primary hover:underline">隐私政策</a> *</span>
+                                        </label>
+                                    </div>
+                                    
+                                    <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom font-medium">
+                                        注册账号
+                                    </button>
+                                    
+                                    <div class="text-center mt-4 text-sm text-gray-600">
+                                        已有账号？<a href="#" class="text-primary hover:underline">立即登录</a>
+                                    </div>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- 页脚 -->
+    <footer class="bg-dark text-white pt-16 pb-8">
+        <div class="container mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8 mb-12">
+                <div>
+                    <div class="flex items-center space-x-2 mb-6">
+                        <div class="w-10 h-10 rounded-lg bg-white flex items-center justify-center">
+                            <i class="fa fa-balance-scale text-primary text-xl"></i>
+                        </div>
+                        <span class="text-xl font-bold">Global Debate Hub</span>
+                    </div>
+                    <p class="text-gray-400 mb-6">
+                        连接全球辩论爱好者的知识共享平台，致力于推动辩论文化的发展和交流。
+                    </p>
+                    <div class="flex space-x-4">
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-facebook"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-twitter"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-instagram"></i>
+                        </a>
+                        <a href="#" class="w-10 h-10 rounded-full bg-gray-800 flex items-center justify-center hover:bg-primary transition-custom">
+                            <i class="fa fa-youtube-play"></i>
+                        </a>
+                    </div>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">快速链接</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#home" class="text-gray-400 hover:text-white transition-custom">首页</a></li>
+                        <li><a href="#resources" class="text-gray-400 hover:text-white transition-custom">资源库</a></li>
+                        <li><a href="#debates" class="text-gray-400 hover:text-white transition-custom">辩论动态</a></li>
+                        <li><a href="#discussion" class="text-gray-400 hover:text-white transition-custom">讨论区</a></li>
+                        <li><a href="#upload" class="text-gray-400 hover:text-white transition-custom">上传资源</a></li>
+                        <li><a href="#community" class="text-gray-400 hover:text-white transition-custom">社区</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">资源分类</h4>
+                    <ul class="space-y-3">
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">辩论教程</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">赛事视频</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">辩题分析</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">技巧策略</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">团队管理</a></li>
+                        <li><a href="#" class="text-gray-400 hover:text-white transition-custom">评委点评</a></li>
+                    </ul>
+                </div>
+                
+                <div>
+                    <h4 class="text-lg font-bold mb-6">联系我们</h4>
+                    <ul class="space-y-3">
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-envelope-o text-gray-400 mt-1"></i>
+                            <span class="text-gray-400">contact@globaldebatehub.com</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-phone text-gray-400 mt-1"></i>
+                            <span class="text-gray-400">+86 (123) 4567-8910</span>
+                        </li>
+                        <li class="flex items-start gap-3">
+                            <i class="fa fa-map-marker text-gray-400 mt-1"></i>
+                            <span class="text-gray-400">北京市海淀区中关村大街1号</span>
+                        </li>
+                    </ul>
+                    
+                    <div class="mt-6">
+                        <h5 class="font-medium mb-3">订阅辩论资讯</h5>
+                        <div class="flex">
+                            <input type="email" placeholder="你的邮箱地址" class="px-4 py-2 bg-gray-800 text-white rounded-l-lg focus:outline-none focus:ring-1 focus:ring-primary flex-1">
+                            <button class="px-4 py-2 bg-primary text-white rounded-r-lg hover:bg-primary/90 transition-custom">
+                                <i class="fa fa-paper-plane"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="border-t border-gray-800 pt-8">
+                <div class="flex flex-col md:flex-row justify-between items-center">
+                    <p class="text-gray-500 text-sm mb-4 md:mb-0">
+                        © 2023 Global Debate Hub. 保留所有权利。
+                    </p>
+                    <div class="flex space-x-6">
+                        <a href="#" class="text-gray-500 hover:text-gray-300 text-sm">隐私政策</a>
+                        <a href="#" class="text-gray-500 hover:text-gray-300 text-sm">服务条款</a>
+                        <a href="#" class="text-gray-500 hover:text-gray-300 text-sm">版权声明</a>
+                        <a href="#" class="text-gray-500 hover:text-gray-300 text-sm">帮助中心</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </footer>
+
+    <!-- 登录模态框 -->
+    <div id="loginModal" class="fixed inset-0 bg-black/50 z-50 flex items-center justify-center hidden">
+        <div class="bg-white rounded-2xl shadow-2xl w-full max-w-md mx-4 transform transition-all scale-95 opacity-0" id="modalContent">
+            <div class="p-6 md:p-8">
+                <div class="flex justify-between items-center mb-6">
+                    <h3 class="text-xl font-bold">用户登录</h3>
+                    <button id="closeLoginModal" class="text-gray-500 hover:text-gray-700">
+                        <i class="fa fa-times text-xl"></i>
+                    </button>
+                </div>
+                
+                <form id="loginForm">
+                    <div class="mb-4">
+                        <label for="loginEmail" class="block text-sm font-medium text-gray-700 mb-1">电子邮箱 *</label>
+                        <input type="email" id="loginEmail" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="your@email.com">
+                    </div>
+                    
+                    <div class="mb-6">
+                        <div class="flex justify-between mb-1">
+                            <label for="loginPassword" class="block text-sm font-medium text-gray-700">密码 *</label>
+                            <a href="#" class="text-sm text-primary hover:underline">忘记密码？</a>
+                        </div>
+                        <input type="password" id="loginPassword" class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-primary focus:border-primary transition-custom" placeholder="请输入密码">
+                    </div>
+                    
+                    <button type="submit" class="w-full py-3 bg-primary text-white rounded-lg hover:bg-primary/90 transition-custom font-medium mb-4">
+                        登录
+                    </button>
+                    
+                    <div class="text-center text-sm text-gray-600 mb-4">
+                        或使用以下方式登录
+                    </div>
+                    
+                    <div class="flex gap-3 mb-6">
+                        <button type="button" class="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-custom flex items-center justify-center">
+                            <i class="fa fa-google text-red-500 mr-2"></i> Google
+                        </button>
+                        <button type="button" class="flex-1 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-custom flex items-center justify-center">
+                            <i class="fa fa-facebook text-blue-600 mr-2"></i> Facebook
+                        </button>
+                    </div>
+                    
+                    <div class="text-center text-sm text-gray-600">
+                        还没有账号？<a href="#" class="text-primary hover:underline" id="switchToRegister">立即注册</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // 导航栏滚动效果
+        window.addEventListener('scroll', function() {
+            const navbar = document.getElementById('navbar');
+            if (window.scrollY > 50) {
+                navbar.classList.add('shadow-md');
+                navbar.classList.remove('shadow-sm');
+            } else {
+                navbar.classList.remove('shadow-md');
+                navbar.classList.add('shadow-sm');
+            }
+        });
+        
+        // 移动端菜单切换
+        const mobileMenuBtn = document.getElementById('mobileMenuBtn');
+        const mobileMenu = document.getElementById('mobileMenu');
+        
+        mobileMenuBtn.addEventListener('click', function() {
+            mobileMenu.classList.toggle('hidden');
+        });
+        
+        // 登录模态框
+        const loginBtn = document.getElementById('loginBtn');
+        const registerBtn = document.getElementById('registerBtn');
+        const joinNowBtn = document.getElementById('joinNowBtn');
+        const loginModal = document.getElementById('loginModal');
+        const modalContent = document.getElementById('modalContent');
+        const closeLoginModal = document.getElementById('closeLoginModal');
+        const switchToRegister = document.getElementById('switchToRegister');
+        
+        function openModal() {
+            loginModal.classList.remove('hidden');
+            setTimeout(() => {
+                modalContent.classList.remove('scale-95', 'opacity-0');
+                modalContent.classList.add('scale-100', 'opacity-1');
+            }, 10);
+        }
+        
+        function closeModal() {
+            modalContent.classList.remove('scale-100', 'opacity-1');
+            modalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                loginModal.classList.add('hidden');
+            }, 300);
+        }
+        
+        loginBtn.addEventListener('click', openModal);
+        closeLoginModal.addEventListener('click', closeModal);
+        loginModal.addEventListener('click', function(e) {
+            if (e.target === loginModal) {
+                closeModal();
+            }
+        });
+        
+        // 切换到注册表单（实际项目中需要实现表单切换逻辑）
+        registerBtn.addEventListener('click', openModal);
+        joinNowBtn.addEventListener('click', openModal);
+        switchToRegister.addEventListener('click', function(e) {
+            e.preventDefault();
+            alert('在实际项目中，这里会切换到注册表单');
+        });
+        
+        // 新话题模态框
+        const newTopicBtn = document.getElementById('newTopicBtn');
+        const sidebarNewTopicBtn = document.getElementById('sidebarNewTopicBtn');
+        const newTopicModal = document.getElementById('newTopicModal');
+        const newTopicModalContent = document.getElementById('newTopicModalContent');
+        const closeNewTopicModal = document.getElementById('closeNewTopicModal');
+        const cancelTopicBtn = document.getElementById('cancelTopicBtn');
+        
+        function openNewTopicModal() {
+            newTopicModal.classList.remove('hidden');
+            setTimeout(() => {
+                newTopicModalContent.classList.remove('scale-95', 'opacity-0');
+                newTopicModalContent.classList.add('scale-100', 'opacity-1');
+            }, 10);
+        }
+        
+        function closeNewTopicModalFunc() {
+            newTopicModalContent.classList.remove('scale-100', 'opacity-1');
+            newTopicModalContent.classList.add('scale-95', 'opacity-0');
+            setTimeout(() => {
+                newTopicModal.classList.add('hidden');
+            }, 300);
+        }
+        
+        newTopicBtn.addEventListener('click', openNewTopicModal);
+        sidebarNewTopicBtn.addEventListener('click', openNewTopicModal);
+        closeNewTopicModal.addEventListener('click', closeNewTopicModalFunc);
+        cancelTopicBtn.addEventListener('click', closeNewTopicModalFunc);
+        newTopicModal.addEventListener('click', function(e) {
+            if (e.target === newTopicModal) {
+                closeNewTopicModalFunc();
+            }
+        });
+        
+        // 讨论区功能
+        // 查看回复
+        document.querySelectorAll('.view-replies').forEach(button => {
+            button.addEventListener('click', function() {
+                const repliesPreview = this.nextElementSibling;
+                const replyForm = this.parentElement.querySelector('.reply-form');
+                
+                // 切换回复预览的显示状态
+                if (repliesPreview) {
+                    repliesPreview.classList.toggle('hidden');
+                }
+                
+                // 切换按钮文本和图标
+                if (this.innerHTML.includes('查看全部回复')) {
+                    this.innerHTML = '收起回复 <i class="fa fa-angle-up ml-1"></i>';
+                } else {
+                    this.innerHTML = '查看全部回复 <i class="fa fa-angle-down ml-1"></i>';
+                }
+                
+                // 如果回复表单是打开的，关闭它
+                if (replyForm && replyForm.classList.contains('active')) {
+                    replyForm.classList.remove('active');
+                }
+            });
+        });
+        
+        // 回复按钮
+        document.querySelectorAll('.reply-btn').forEach(button => {
+            button.addEventListener('click', function() {
+                const replyForm = this.closest('.discussion-post').querySelector('.reply-form');
+                
+                // 关闭其他可能打开的回复表单
+                document.querySelectorAll('.reply-form').forEach(form => {
+                    if (form !== replyForm) {
+                        form.classList.remove('active');
+                    }
+                });
+                
+                // 切换当前回复表单的状态
+                replyForm.classList.toggle('active');
+                
+                // 如果打开了回复表单，自动聚焦到文本框
+                if (replyForm.classList.contains('active')) {
+                    replyForm.querySelector('textarea').focus();
+                }
+            });
+        });
+        
+        // 取消回复
+        document.querySelectorAll('.cancel-reply').forEach(button => {
+            button.addEventListener('click', function() {
+                const replyForm = this.closest('.reply-form');
+                replyForm.classList.remove('active');
+            });
+        });
+        
+        // 提交回复
+        document.querySelectorAll('.submit-reply').forEach(button => {
+            button.addEventListener('click', function() {
+                const replyForm = this.closest('.reply-form');
+                const textarea = replyForm.querySelector('textarea');
+                const replyText = textarea.value.trim();
+                
+                if (replyText) {
+                    // 在实际项目中，这里会发送回复到服务器
+                    alert('回复已提交：\n' + replyText);
+                    
+                    // 清空文本框并关闭回复表单
+                    textarea.value = '';
+                    replyForm.classList.remove('active');
+                } else {
+                    alert('请输入回复内容');
+                }
+            });
+        });
+        
+        // 点击话题标题查看完整话题
+        document.querySelectorAll('.topic-title').forEach(title => {
+            title.addEventListener('click', function() {
+                const topicText = this.textContent;
+                alert(`在实际项目中，这里会跳转到"${topicText}"的完整话题页面`);
+            });
+        });
+        
+        // 新话题表单提交
+        document.getElementById('newTopicForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('topicTitle').value.trim();
+            const content = document.getElementById('topicContent').value.trim();
+            
+            if (!title) {
+                alert('请输入话题标题');
+                return;
+            }
+            
+            if (!content) {
+                alert('请输入话题内容');
+                return;
+            }
+            
+            // 在实际项目中，这里会将新话题提交到服务器
+            alert(`新话题已发布：\n标题：${title}\n内容：${content.substring(0, 50)}...`);
+            closeNewTopicModalFunc();
+            
+            // 清空表单
+            this.reset();
+        });
+        
+        // 表单提交处理
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('资源上传功能已触发，在实际项目中会处理文件上传逻辑');
+        });
+        
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('注册功能已触发，在实际项目中会处理用户注册逻辑');
+        });
+        
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            alert('登录功能已触发，在实际项目中会处理用户登录逻辑');
+            closeModal();
+        });
+        
+        // 资源统计图表
+        const ctx = document.getElementById('resourceChart').getContext('2d');
+        const resourceChart = new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: ['1月', '2月', '3月', '4月', '5月', '6月'],
+                datasets: [
+                    {
+                        label: '新增资源',
+                        data: [120, 190, 150, 230, 290, 320],
+                        borderColor: '#165DFF',
+                        backgroundColor: 'rgba(22, 93, 255, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    },
+                    {
+                        label: '下载量',
+                        data: [350, 420, 380, 550, 620, 780],
+                        borderColor: '#722ED1',
+                        backgroundColor: 'rgba(114, 46, 209, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }
+                ]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    },
+                    tooltip: {
+                        mode: 'index',
+                        intersect: false
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+        
+        // 平滑滚动
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                
+                // 关闭移动端菜单（如果打开）
+                if (!mobileMenu.classList.contains('hidden')) {
+                    mobileMenu.classList.add('hidden');
+                }
+                
+                const targetId = this.getAttribute('href');
+                const targetElement = document.querySelector(targetId);
+                
+                if (targetElement) {
+                    window.scrollTo({
+                        top: targetElement.offsetTop - 80,
+                        behavior: 'smooth'
+                    });
+                }
+            });
+        });
+        
+        // 页面加载时的渐入动画
+        document.addEventListener('DOMContentLoaded', function() {
+            const fadeElements = document.querySelectorAll('.fade-in');
+            
+            const observer = new IntersectionObserver((entries) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.style.opacity = '1';
+                        entry.target.style.transform = 'translateY(0)';
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, { threshold: 0.1 });
+            
+            fadeElements.forEach(element => {
+                element.style.opacity = '0';
+                element.style.transform = 'translateY(20px)';
+                element.style.transition = 'opacity 0.6s ease-out, transform 0.6s ease-out';
+                observer.observe(element);
+            });
+        });
+    </script>
+
+
+</body>
+</html>
